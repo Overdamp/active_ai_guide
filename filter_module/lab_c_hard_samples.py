@@ -19,15 +19,24 @@ import torch
 import numpy as np
 from ultralytics import YOLO
 
+# ที่อยู่ชุดข้อมูล/โมเดล (แก้ผ่าน env PTT_DATASET_DIR / PTT_MODEL_PATH ได้)
+DATASET_DIR = os.environ.get(
+    "PTT_DATASET_DIR",
+    "/home/luke/ai_training/PTT_ai_mini/datasets/active_learning_split/seed_dataset",
+)
+
 # 1. โหลดโมเดลจริง PTT YOLO12 Baseline
-MODEL_PATH = "/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt"
+MODEL_PATH = os.environ.get(
+    "PTT_MODEL_PATH",
+    "/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt",
+)
 print(f"⏳ กำลังโหลดโมเดล: {os.path.basename(MODEL_PATH)}...")
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model = YOLO(MODEL_PATH)
 print(f"✅ โหลดโมเดลสำเร็จบนอุปกรณ์: {device.upper()} (รองรับ {len(model.names)} คลาสอุปกรณ์ ปตท.)\n")
 
 # 2. เตรียมชุดภาพและ Label จาก Validation Set ของ ปตท.
-BASE_DIR = "/home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11/valid"
+BASE_DIR = os.path.join(DATASET_DIR, "valid")
 img_paths = sorted(glob.glob(os.path.join(BASE_DIR, "images", "*.jpg")))[:10]
 label_dir = os.path.join(BASE_DIR, "labels")
 

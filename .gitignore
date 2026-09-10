@@ -25,6 +25,10 @@ __pycache__/
 mini_ptt.db
 .fiftyone/
 runs/
+# lab_c / lab_d เขียน output ที่ root ด้วย — ตัวจริงที่เก็บไว้อยู่ใน filter_module/
+/cvat_tasks_manifest.json
+/diagnostic_action_report.json
+/lab_c_hard_sample_visualized.jpg
 
 # Docker lab (docker/)
 docker/.env

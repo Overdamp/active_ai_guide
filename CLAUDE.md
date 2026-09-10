@@ -52,10 +52,15 @@ python filter_module/lab01_review_state.py
 python fiftyone_module/lab_fiftyone_curation.py
 ```
 
-### External assets ที่ labs พึ่งพา (อยู่นอก repo นี้ — ห้าม hardcode ซ้ำ ให้ import จากที่เดียว)
-- โมเดล: `/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt`
-- ชุดข้อมูล: `/home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11/{train,valid,test}/{images,labels}`
-- Lab C/D จะรันไม่ได้ถ้าไม่มีไฟล์ 2 อย่างนี้ → รายงานว่าขาด asset ไม่ใช่ bug ในโค้ด
+### ชุดข้อมูล & โมเดล (path แก้ผ่าน env — ห้าม hardcode ซ้ำในโค้ดใหม่)
+- **ชุดข้อมูลของโปรเจกต์นี้:** `datasets/active_learning_split/{seed,pool}_dataset/{train,valid,test}/{images,labels}`
+  - โครงสร้าง YOLO ปกติ + มี `data.yaml` (26 คลาส) ต่อ sub-dataset
+  - **ภาพเป็น symlink** ชี้ไป `datasets/overall-ptt-object-detection.v11i.yolov11/` (เป็น symlink อีกทีไป `PTT_smart_ai_platform`)
+    → setup ครั้งเดียว: `ln -sfn /home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11 datasets/overall-ptt-object-detection.v11i.yolov11`
+  - ทุก lab/test อ่าน path จาก **`os.environ.get("PTT_DATASET_DIR", ".../active_learning_split/seed_dataset")`**
+- **โมเดล:** env `PTT_MODEL_PATH` (default `/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt`)
+- Lab C/D รันไม่ได้ถ้า symlink dangling หรือไม่มีโมเดล → รายงานว่าขาด asset ไม่ใช่ bug ในโค้ด
+- `datasets/` ทั้งโฟลเดอร์ถูก gitignore (เป็นข้อมูล/symlink ไม่เก็บใน git)
 
 ---
 

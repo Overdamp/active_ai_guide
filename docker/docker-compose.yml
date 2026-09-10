@@ -49,19 +49,24 @@ services:
       FIFTYONE_DEFAULT_APP_ADDRESS: "0.0.0.0"
       FIFTYONE_DEFAULT_APP_PORT: "5151"
       FIFTYONE_SHOW_PROGRESS_BARS: "false"
-      # path ของ repo PTT_smart_ai_platform ภายใน container (ต้องตรงกับ bind mount ด้านล่าง)
-      PTT_PLATFORM_DIR: ${PTT_PLATFORM_DIR:-/home/luke/ai_training/PTT_smart_ai_platform}
+      # ชุดข้อมูลของโปรเจกต์นี้ (labs/tests อ่านจาก env ตัวนี้) — ชี้เข้า /workspace ที่ mount ไว้
+      PTT_DATASET_DIR: /workspace/datasets/active_learning_split/seed_dataset
+      # โมเดล YOLO จริง (อยู่ใน repo ต้นทาง ดู bind mount ข้อ 2)
+      PTT_MODEL_PATH: ${PTT_PLATFORM_DIR:-/home/luke/ai_training/PTT_smart_ai_platform}/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt
     ports:
       - "${FIFTYONE_APP_PORT:-5151}:5151"
     volumes:
-      # 1) โค้ดโปรเจกต์ทั้งหมด (อ่าน-เขียน) — ใช้เป็น working dir
+      # 1) โปรเจกต์นี้ทั้งหมด (rw) — mount 2 ที่:
+      #    /workspace                              = working dir
+      #    /home/luke/ai_training/PTT_ai_mini      = ให้ absolute path ใน lab resolve ได้
       - ..:/workspace
-      # 2) dataset + model จริงของ ปตท. mount ที่ "path เดิม" แบบอ่านอย่างเดียว
-      #    เพื่อให้สคริปต์ lab ที่ hardcode absolute path รันได้ทันทีโดยไม่ต้องแก้โค้ด
-      #    ถ้าเครื่องนี้ไม่มี repo PTT_smart_ai_platform ให้คอมเมนต์ 2 บรรทัดนี้ทิ้ง
-      #    (เทสที่ต้องใช้ภาพจริงจะขึ้น SKIPPED เอง)
+      - ..:/home/luke/ai_training/PTT_ai_mini
+      # 2) repo ต้นทางของภาพ (datasets/active_learning_split เก็บภาพเป็น symlink ที่ชี้มาที่นี่)
+      #    + โมเดล YOLO  — mount ที่ path เดิม read-only
+      #    ถ้าเครื่องนี้ไม่มี repo PTT_smart_ai_platform ให้คอมเมนต์บรรทัดนี้ทิ้ง
+      #    (เทสที่ต้องใช้ label จริงจะขึ้น SKIPPED เอง)
       - ${PTT_PLATFORM_DIR:-/home/luke/ai_training/PTT_smart_ai_platform}:${PTT_PLATFORM_DIR:-/home/luke/ai_training/PTT_smart_ai_platform}:ro
-      # 3) state/โมเดล zoo ของ FiftyOne — เก็บข้าม container
+      # 3) state ของ FiftyOne — เก็บข้าม container
       - fiftyone_home:/root/.fiftyone
     working_dir: /workspace
     # ให้ container รันค้างไว้ เพื่อใช้ docker compose exec เข้าไปรันเทส / เปิด App

@@ -19,6 +19,12 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 from PIL import Image
 
+# ที่อยู่ชุดข้อมูลของโปรเจกต์นี้ (แก้ผ่าน env PTT_DATASET_DIR ได้)
+DATASET_DIR = os.environ.get(
+    "PTT_DATASET_DIR",
+    "/home/luke/ai_training/PTT_ai_mini/datasets/active_learning_split/seed_dataset",
+)
+
 # 1. โหลดโมเดลสกัดเวกเตอร์ MobileNetV3 (Offline จากแคชในเครื่อง)
 print("⏳ กำลังโหลดโมเดล MobileNetV3 (Offline)...")
 model = models.mobilenet_v3_small(weights="DEFAULT")
@@ -32,7 +38,7 @@ transform = transforms.Compose([
 ])
 
 # 2. กวาดภาพถ่ายจริง 25 ภาพจากชุดข้อมูล ปตท.
-image_paths = sorted(glob.glob("/home/luke/ai_training/PTT_smart_ai_platform/datasets/**/*.jpg", recursive=True))[:25]
+image_paths = sorted(glob.glob(os.path.join(DATASET_DIR, "**", "*.jpg"), recursive=True))[:25]
 print(f"📁 พบภาพถ่ายจริงจากชุดข้อมูล ปตท. ทั้งหมด: {len(image_paths)} ภาพ\n")
 
 print("--- 🔍 สเต็ปที่ 1: สกัดเวกเตอร์จากภาพถ่ายจริง (Feature Embeddings) ---")

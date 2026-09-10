@@ -22,9 +22,15 @@ FiftyOne **ต้องมี MongoDB เสมอ** เพื่อเก็บ
                                         │  - FiftyOne App :5151 ─► host │
                                         └───────────────┬───────────────┘
                                        bind mounts:     │
-        ..(PTT_ai_mini)  ─►  /workspace  (rw)           │
-        PTT_smart_ai_platform ─► path เดิม (ro)  ◄───────┘  (dataset + model จริง)
+   ..(PTT_ai_mini) ─► /workspace + /home/luke/ai_training/PTT_ai_mini (rw)
+   PTT_smart_ai_platform ─► path เดิม (ro)  ◄────────────┘  (ต้นทางภาพ + โมเดล YOLO)
 ```
+
+**ชุดข้อมูลของโปรเจกต์นี้:** `datasets/active_learning_split/{seed,pool}_dataset`
+(โครงสร้าง YOLO ปกติ `train/valid/test` × `images/labels`) โดย **ภาพเก็บเป็น symlink**
+ที่ชี้ไปยัง `datasets/overall-ptt-object-detection.v11i.yolov11/` ซึ่งเป็น symlink อีกทีไปที่
+repo `PTT_smart_ai_platform` — labs/tests อ่าน path จาก env **`PTT_DATASET_DIR`**
+(ค่าเริ่มต้น = `.../active_learning_split/seed_dataset`)
 
 ### โครงสร้างไฟล์
 
@@ -62,9 +68,25 @@ docker/
 | Docker Engine ≥ 24 + Docker Compose v2 | `docker version` / `docker compose version` |
 | พื้นที่ดิสก์ ~2–3 GB (image + mongo volume) | `df -h .` |
 | พอร์ต `5151` ว่างบนเครื่อง host | `ss -ltnp | grep 5151` (ควรไม่มีผลลัพธ์) |
-| (ไม่บังคับ) repo `PTT_smart_ai_platform` พร้อม `datasets/` + `models/` | `ls /home/luke/ai_training/PTT_smart_ai_platform/datasets` |
+| ชุดข้อมูล `datasets/active_learning_split/` — symlink ต้อง resolve ได้ | ดู "ตั้งค่าชุดข้อมูล" ด้านล่าง |
+| (ต้นทาง symlink) repo `PTT_smart_ai_platform` พร้อม `datasets/` + `models/` | `ls /home/luke/ai_training/PTT_smart_ai_platform/datasets` |
 
-> ถ้า **ไม่มี** `PTT_smart_ai_platform` บนเครื่องนี้ → ดูขั้นที่ 2 (ต้องคอมเมนต์ volume ข้อ 2 ทิ้ง)
+### ตั้งค่าชุดข้อมูล (ทำครั้งเดียว)
+
+ภาพใน `datasets/active_learning_split/` เป็น symlink สัมพัทธ์ที่ต้องการ sibling ชื่อ
+`overall-ptt-object-detection.v11i.yolov11` — สร้างให้ชี้ไป repo ต้นทาง:
+
+```bash
+ln -sfn /home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11 \
+        /home/luke/ai_training/PTT_ai_mini/datasets/overall-ptt-object-detection.v11i.yolov11
+
+# ตรวจว่า resolve ได้
+find /home/luke/ai_training/PTT_ai_mini/datasets/active_learning_split/seed_dataset/valid/images \
+     -type l -xtype f | wc -l          # ควรได้ 773
+```
+
+> ถ้า **ไม่มี** `PTT_smart_ai_platform` บนเครื่องนี้ → symlink จะ dangling, เทสที่ต้องใช้ label
+> จริงจะขึ้น `SKIPPED` (ดูขั้นที่ 2 — คอมเมนต์ volume ข้อ 2 ทิ้ง)
 
 ---
 
@@ -78,9 +100,13 @@ cp .env.example .env
 แก้ `.env` ตามเครื่อง:
 
 ```ini
-PTT_PLATFORM_DIR=/home/luke/ai_training/PTT_smart_ai_platform   # path repo จริง (dataset+model)
+PTT_PLATFORM_DIR=/home/luke/ai_training/PTT_smart_ai_platform   # ต้นทางภาพ (ที่ symlink ชี้ไป) + โมเดล YOLO
 FIFTYONE_APP_PORT=5151                                          # พอร์ต host ของ FiftyOne App
 ```
+
+> ชุดข้อมูลที่ labs/tests ใช้ = `datasets/active_learning_split/seed_dataset` (ตั้งใน compose ผ่าน
+> `PTT_DATASET_DIR=/workspace/datasets/active_learning_split/seed_dataset` แล้ว)
+> อยากใช้ `pool_dataset` แทน: แก้ค่านั้นใน `docker-compose.yml` หรือ `export PTT_DATASET_DIR=...` ตอนรัน
 
 **กรณีไม่มี repo `PTT_smart_ai_platform`:** เปิด `docker-compose.yml` แล้วคอมเมนต์บรรทัด bind mount ข้อ (2):
 
@@ -119,7 +145,8 @@ docker compose exec fiftyone python -c "import fiftyone as fo; print(fo.__versio
 
 ```bash
 # dataset จริงถูก mount ไหม
-docker compose exec fiftyone bash -lc 'ls "$PTT_PLATFORM_DIR/datasets/overall-ptt-object-detection.v11i.yolov11/valid/images" | head -3'
+docker compose exec fiftyone bash -lc 'ls "$PTT_DATASET_DIR/valid/images" | head -3'   # ควรเห็นไฟล์ .jpg
+docker compose exec fiftyone bash -lc 'python -c "import cv2,glob,os; p=sorted(glob.glob(os.environ[\"PTT_DATASET_DIR\"]+\"/valid/images/*.jpg\"))[0]; print(p, cv2.imread(p) is not None)"'
 ```
 
 ---
@@ -188,7 +215,7 @@ docker/scripts/run-tests.sh tests/test_04_similarity_near_duplicates.py -v
 | `test_10_views_and_aggregations.py` | `match` / `sort_by` / `limit` / `skip` / `exists` / `match_tags` / `filter_labels` + `count_values` / `distinct` / `bounds` / `mean` | บางเทส ✅ |
 | `test_11_export_import_and_cvat.py` | `dataset.export()` (**YOLOv5 / COCO**) + `Dataset.from_dir()` round-trip; `dataset.annotate(backend="cvat")` (marker `needs_cvat`) | ✅ (export), CVAT ต้องมี server |
 
-> เทส `needs_dataset` = ต้อง mount `PTT_smart_ai_platform/datasets` เข้ามา ไม่งั้น `SKIPPED` (ไม่ใช่ FAILED)
+> เทส `needs_dataset` = ต้องอ่าน label จาก `$PTT_DATASET_DIR/valid/labels` ได้ (symlink resolve ได้) ไม่งั้น `SKIPPED` (ไม่ใช่ FAILED)
 > เทส `needs_cvat` = ต้องตั้ง env `CVAT_URL`, `CVAT_USERNAME`, `CVAT_PASSWORD`
 
 ---
@@ -264,7 +291,7 @@ docker/scripts/launch-app.sh demo_uniqueness   # เปิด http://localhost:5
 | `ImportError: libGL.so.1` | ใช้ image นี้ (มี `libgl1` แล้ว) อย่ารันบน python host; ถ้าแก้ Dockerfile ให้คง `opencv-python-headless` |
 | FiftyOne App เปิดใน browser ไม่ขึ้น | (1) รอ 15–20s ตอนเปิดครั้งแรก (2) ต้อง `--address 0.0.0.0` — สคริปต์ทำให้แล้ว (3) `DatasetNotFoundError` = dataset ไม่ persistent, รัน `seed-demo.sh` ก่อน (4) เช็ก `FIFTYONE_APP_PORT` ไม่ชนพอร์ตอื่น |
 | ปิด App ไม่ได้ (`pkill: not found`) | image เป็น slim — ใช้ `docker compose restart fiftyone` |
-| เทส `test_07/08/11` ขึ้น `SKIPPED` | ไม่ได้ mount `datasets/` — ตั้ง `PTT_PLATFORM_DIR` ให้ถูกใน `.env` แล้ว `docker compose up -d` ใหม่ |
+| เทส `test_07/08/11` ขึ้น `SKIPPED` | symlink ของ dataset ยัง dangling — สร้าง sibling `overall-ptt-object-detection.v11i.yolov11` (ดู "ตั้งค่าชุดข้อมูล") + `PTT_PLATFORM_DIR` ใน `.env` ถูกต้อง แล้ว `docker compose up -d` ใหม่ |
 | `compute_visualization(method="umap")` fail | ยังไม่ลง `umap-learn` → ปลดคอมเมนต์ใน `requirements.txt` แล้ว `docker compose build` ใหม่ (หรือรัน `-m "not slow"`) |
 | Mongo volume ข้อมูลค้าง/พัง | `docker compose down -v` แล้วเริ่มใหม่ (ลบ `mongo_data` + `fiftyone_home`) |
 | Permission denied ตอนเขียนไฟล์ใน `/workspace` | container รันเป็น root; ไฟล์ที่สร้างจะเป็น root บน host — `sudo chown -R $USER .` ถ้าจำเป็น |

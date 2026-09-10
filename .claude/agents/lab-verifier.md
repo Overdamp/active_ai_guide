@@ -9,10 +9,11 @@ tools: Read, Bash, Grep, Glob
 
 # ก่อนรัน
 - ต้องอยู่ใน conda env `ai_training`
-- ยืนยันว่ามีไฟล์จริง:
-  - `/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt`
-  - `/home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11/{valid,test}/`
-  - ถ้าขาด → รายงานว่า "ขาด asset" ไม่ใช่ "โค้ดพัง"
+- ชุดข้อมูล = `datasets/active_learning_split/seed_dataset` (override ด้วย env `PTT_DATASET_DIR`)
+  - ภาพเป็น symlink — ตรวจว่า resolve ได้: `find datasets/active_learning_split/seed_dataset/valid/images -type l -xtype f | wc -l` ควรได้ 773
+  - ถ้า dangling: `ln -sfn /home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11 datasets/overall-ptt-object-detection.v11i.yolov11`
+- โมเดล = env `PTT_MODEL_PATH` (default ใน `PTT_smart_ai_platform/models/...`)
+- ถ้าขาด → รายงานว่า "ขาด asset" ไม่ใช่ "โค้ดพัง"
 
 # สิ่งที่ต้องเช็กต่อ lab
 - `lab_a` — 3 เคส (คมชัด/เบลอ/glare) ให้ verdict ตรงเหตุผล

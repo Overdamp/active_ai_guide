@@ -12,6 +12,12 @@ import cv2
 import numpy as np
 import os
 
+# ที่อยู่ชุดข้อมูลของโปรเจกต์นี้ (แก้ผ่าน env PTT_DATASET_DIR ได้ เช่นชี้ไป pool_dataset)
+DATASET_DIR = os.environ.get(
+    "PTT_DATASET_DIR",
+    "/home/luke/ai_training/PTT_ai_mini/datasets/active_learning_split/seed_dataset",
+)
+
 # เกณฑ์มาตรฐานของ ปตท. (Thresholds อ้างอิงจาก filter_stage1_blur_glare.py)
 BLUR_THRESHOLD = 120.0       # ถ้าคะแนน < 120.0 = ภาพเบลอเกินไป
 GLARE_RATIO_THRESHOLD = 0.15 # ถ้าแสงสะท้อนเกิน 15% ของภาพ = ภาพจ้าเกินไป
@@ -55,9 +61,9 @@ def check_image_quality(image_bgr, label="Image"):
 # ==============================================================================
 
 # 1. ภาพจริงที่คมชัดสูง (จากชุดข้อมูล ปตท.)
-sharp_path = "/home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11/valid/images/Part7-Drift_018267_jpg.rf.31f902b44e079fda71110507d397f908.jpg"
+sharp_path = os.path.join(DATASET_DIR, "valid/images/Part7-Drift_018267_jpg.rf.31f902b44e079fda71110507d397f908.jpg")
 # 2. ภาพจริงที่กล้องสั่น/เบลอจริง (จากชุดข้อมูล ปตท.)
-blurry_path = "/home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11/valid/images/Part8-Nep_031295_jpg.rf.c0bfedf4fe42d92841e3be55d6c5cf0e.jpg"
+blurry_path = os.path.join(DATASET_DIR, "valid/images/Part8-Nep_031295_jpg.rf.c0bfedf4fe42d92841e3be55d6c5cf0e.jpg")
 
 if os.path.exists(sharp_path) and os.path.exists(blurry_path):
     # เคส 1: ภาพคมชัด

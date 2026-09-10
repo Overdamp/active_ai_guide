@@ -24,8 +24,15 @@ from ultralytics import YOLO
 # ==============================================================================
 # 1. โหลดโมเดลและข้อมูลทดสอบจริง
 # ==============================================================================
-MODEL_PATH = "/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt"
-BASE_DATASET = "/home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11"
+# ที่อยู่ชุดข้อมูล/โมเดล (แก้ผ่าน env PTT_DATASET_DIR / PTT_MODEL_PATH ได้)
+MODEL_PATH = os.environ.get(
+    "PTT_MODEL_PATH",
+    "/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt",
+)
+BASE_DATASET = os.environ.get(
+    "PTT_DATASET_DIR",
+    "/home/luke/ai_training/PTT_ai_mini/datasets/active_learning_split/seed_dataset",
+)
 valid_img_dir = os.path.join(BASE_DATASET, "valid", "images")
 valid_lbl_dir = os.path.join(BASE_DATASET, "valid", "labels")
 test_img_dir = os.path.join(BASE_DATASET, "test", "images")
@@ -78,7 +85,7 @@ if len(safe_training_buffer) >= MIN_SAMPLES_TO_TRIGGER:
     print(f"🎯 [TRIGGER APPROVED]: ตัวอย่างเคสยากที่ปลอดภัยมี {len(safe_training_buffer)} ภาพ (ครบเกณฑ์ขั้นต่ำ {MIN_SAMPLES_TO_TRIGGER})")
     recommended_training_config = {
         "model": MODEL_PATH,
-        "data": "datasets/overall-ptt-object-detection.v11i.yolov11/data.yaml",
+        "data": os.path.join(BASE_DATASET, "data.yaml"),
         "epochs": 30,
         "batch": 16,
         "imgsz": 640,

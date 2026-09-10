@@ -18,6 +18,12 @@ from fiftyone import ViewField as F
 # 1. ปิด Progress Bar เพื่อความสะอาดของ Log
 fo.config.show_progress_bars = False
 
+# ที่อยู่ชุดข้อมูลของโปรเจกต์นี้ (แก้ผ่าน env PTT_DATASET_DIR ได้)
+DATASET_DIR = os.environ.get(
+    "PTT_DATASET_DIR",
+    "/home/luke/ai_training/PTT_ai_mini/datasets/active_learning_split/seed_dataset",
+)
+
 # 2. เตรียมภาพถ่ายจริง 5 ภาพจากชุดข้อมูล ปตท.
 DATASET_NAME = "ptt_mini_curation_demo"
 if fo.dataset_exists(DATASET_NAME):
@@ -25,7 +31,7 @@ if fo.dataset_exists(DATASET_NAME):
 
 dataset = fo.Dataset(DATASET_NAME)
 
-img_paths = sorted(glob.glob("/home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11/valid/images/*.jpg"))[:5]
+img_paths = sorted(glob.glob(os.path.join(DATASET_DIR, "valid/images/*.jpg")))[:5]
 print(f"📁 โหลดภาพถ่ายจริง {len(img_paths)} ภาพเข้า FiftyOne Dataset...")
 
 # เพิ่มภาพลง FiftyOne

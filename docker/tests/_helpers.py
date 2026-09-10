@@ -19,11 +19,13 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-# --- path ของ dataset จริง -------------------------------------------------
-PTT_PLATFORM_DIR = Path(
-    os.environ.get("PTT_PLATFORM_DIR", "/home/luke/ai_training/PTT_smart_ai_platform")
-)
-PTT_DATASET_DIR = PTT_PLATFORM_DIR / "datasets" / "overall-ptt-object-detection.v11i.yolov11"
+# --- path ของ dataset ในโปรเจกต์นี้ (แก้ผ่าน env PTT_DATASET_DIR ได้) -------
+# ค่าเริ่มต้น = active_learning_split/seed_dataset ของ PTT_ai_mini
+# (ใน container docker-compose ตั้ง env ให้ชี้มาที่ /workspace/... อยู่แล้ว)
+PTT_DATASET_DIR = Path(os.environ.get(
+    "PTT_DATASET_DIR",
+    "/home/luke/ai_training/PTT_ai_mini/datasets/active_learning_split/seed_dataset",
+))
 
 
 # =========================================================================
