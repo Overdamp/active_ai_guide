@@ -1,0 +1,13 @@
+# FiftyOne stack สำหรับ lab นี้ — ตั้งใจให้ image เล็ก ไม่มี torch/YOLO
+# (lab_fiftyone_curation.py และเทสทั้งหมดใช้แค่ fiftyone + opencv + numpy + sklearn)
+
+fiftyone>=1.21,<1.22
+opencv-python-headless>=4.9,<5
+numpy>=1.26
+scikit-learn>=1.3          # backend ของ compute_similarity (sklearn) + method="pca" ของ compute_visualization
+pytest>=8.0
+pytest-timeout>=2.3
+
+# --- optional -------------------------------------------------------------
+# เปิดใช้ถ้าจะทดสอบ compute_visualization(method="umap") หรือ method="tsne"
+# umap-learn>=0.5

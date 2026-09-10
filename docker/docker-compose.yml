@@ -1,0 +1,73 @@
+# =============================================================================
+# PTT_ai_mini — FiftyOne Lab Stack
+# -----------------------------------------------------------------------------
+# 2 services:
+#   mongo    : ฐานข้อมูล MongoDB ที่ FiftyOne ใช้เก็บ metadata ของ Dataset/Sample/Label
+#              (FiftyOne ต้องมี MongoDB เสมอ — ปกติจะฝังมาในตัว แต่ใน Docker เราแยกออกมา
+#               เพื่อให้ข้อมูลคงอยู่ข้าม container และ debug ง่าย)
+#   fiftyone : Python 3.12 + FiftyOne 1.21 + OpenCV — ใช้รัน lab_fiftyone_curation.py
+#              และชุดเทสใน docker/tests/ รวมถึงเปิด FiftyOne App (เว็บ) ที่พอร์ต 5151
+#
+# เริ่มใช้งาน:  cp .env.example .env  &&  docker compose up -d --build
+# ดูคู่มือเต็ม: docker/README.md
+# =============================================================================
+
+name: ptt-fiftyone-lab
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: ptt-fo-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    # ไม่ต้อง map port ออก host — fiftyone คุยกับ mongo ผ่าน network ภายในชื่อ "mongo"
+    # ถ้าอยากต่อ mongosh จากเครื่อง host ให้ปลดคอมเมนต์บรรทัดล่าง
+    # ports:
+    #   - "27017:27017"
+
+  fiftyone:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ptt-fiftyone-lab:latest
+    container_name: ptt-fo-app
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      # ชี้ FiftyOne ไปที่ mongo service (ห้ามให้มันสตาร์ท mongod ของตัวเอง)
+      FIFTYONE_DATABASE_URI: mongodb://mongo:27017
+      FIFTYONE_DATABASE_NAME: ptt_fiftyone
+      # ให้ FiftyOne App bind 0.0.0.0 เพื่อให้เบราว์เซอร์บน host เข้าถึงได้
+      FIFTYONE_DEFAULT_APP_ADDRESS: "0.0.0.0"
+      FIFTYONE_DEFAULT_APP_PORT: "5151"
+      FIFTYONE_SHOW_PROGRESS_BARS: "false"
+      # path ของ repo PTT_smart_ai_platform ภายใน container (ต้องตรงกับ bind mount ด้านล่าง)
+      PTT_PLATFORM_DIR: ${PTT_PLATFORM_DIR:-/home/luke/ai_training/PTT_smart_ai_platform}
+    ports:
+      - "${FIFTYONE_APP_PORT:-5151}:5151"
+    volumes:
+      # 1) โค้ดโปรเจกต์ทั้งหมด (อ่าน-เขียน) — ใช้เป็น working dir
+      - ..:/workspace
+      # 2) dataset + model จริงของ ปตท. mount ที่ "path เดิม" แบบอ่านอย่างเดียว
+      #    เพื่อให้สคริปต์ lab ที่ hardcode absolute path รันได้ทันทีโดยไม่ต้องแก้โค้ด
+      #    ถ้าเครื่องนี้ไม่มี repo PTT_smart_ai_platform ให้คอมเมนต์ 2 บรรทัดนี้ทิ้ง
+      #    (เทสที่ต้องใช้ภาพจริงจะขึ้น SKIPPED เอง)
+      - ${PTT_PLATFORM_DIR:-/home/luke/ai_training/PTT_smart_ai_platform}:${PTT_PLATFORM_DIR:-/home/luke/ai_training/PTT_smart_ai_platform}:ro
+      # 3) state/โมเดล zoo ของ FiftyOne — เก็บข้าม container
+      - fiftyone_home:/root/.fiftyone
+    working_dir: /workspace
+    # ให้ container รันค้างไว้ เพื่อใช้ docker compose exec เข้าไปรันเทส / เปิด App
+    command: ["sleep", "infinity"]
+    tty: true
+
+volumes:
+  mongo_data:
+  fiftyone_home:

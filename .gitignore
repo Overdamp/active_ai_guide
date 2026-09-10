@@ -26,6 +26,11 @@ mini_ptt.db
 .fiftyone/
 runs/
 
+# Docker lab (docker/)
+docker/.env
+docker/.demo_images/
+docker/**/__pycache__/
+
 # OS / editor
 .DS_Store
 .vscode/
