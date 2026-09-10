@@ -52,15 +52,15 @@ python filter_module/lab01_review_state.py
 python fiftyone_module/lab_fiftyone_curation.py
 ```
 
-### ชุดข้อมูล & โมเดล (path แก้ผ่าน env — ห้าม hardcode ซ้ำในโค้ดใหม่)
-- **ชุดข้อมูลของโปรเจกต์นี้:** `datasets/active_learning_split/{seed,pool}_dataset/{train,valid,test}/{images,labels}`
-  - โครงสร้าง YOLO ปกติ + มี `data.yaml` (26 คลาส) ต่อ sub-dataset
-  - **ภาพเป็น symlink** ชี้ไป `datasets/overall-ptt-object-detection.v11i.yolov11/` (เป็น symlink อีกทีไป `PTT_smart_ai_platform`)
-    → setup ครั้งเดียว: `ln -sfn /home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11 datasets/overall-ptt-object-detection.v11i.yolov11`
-  - ทุก lab/test อ่าน path จาก **`os.environ.get("PTT_DATASET_DIR", ".../active_learning_split/seed_dataset")`**
-- **โมเดล:** env `PTT_MODEL_PATH` (default `/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt`)
-- Lab C/D รันไม่ได้ถ้า symlink dangling หรือไม่มีโมเดล → รายงานว่าขาด asset ไม่ใช่ bug ในโค้ด
-- `datasets/` ทั้งโฟลเดอร์ถูก gitignore (เป็นข้อมูล/symlink ไม่เก็บใน git)
+### ชุดข้อมูล & โมเดล (อยู่ในตัว repo — path แก้ผ่าน env, ห้าม hardcode ซ้ำในโค้ดใหม่)
+- **ชุดข้อมูล:** `datasets/active_learning_split/{seed,pool}_dataset/{train,valid,test}/{images,labels}` + `data.yaml` (26 คลาส)
+  - ภาพเป็น symlink สัมพัทธ์ → resolve เข้า `datasets/overall-ptt-object-detection.v11i.yolov11/` (ไดเรกทอรีจริงในตัว repo, hardlink)
+  - **ทุก path resolve อยู่ใน `PTT_ai_mini` ล้วน ๆ — ไม่พึ่ง `PTT_smart_ai_platform` แล้ว**
+- **โมเดล:** `models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt` (ในตัว repo)
+- **หลัง clone ใหม่:** `datasets/` + `models/` ถูก gitignore (ใหญ่) → รัน **`scripts/setup-assets.sh`** ครั้งเดียว
+  (hardlink จาก repo ต้นทาง `PTT_smart_ai_platform` — filesystem เดียวกัน ~0 bytes; แก้ต้นทางด้วย env `PTT_ASSET_SRC`)
+- labs/tests อ่าน path จาก env: `PTT_DATASET_DIR` (default `.../active_learning_split/seed_dataset`), `PTT_MODEL_PATH` (default `.../models/...pt`)
+- Lab C/D รันไม่ได้ถ้ายังไม่ setup asset → รายงานว่า "ขาด asset (รัน scripts/setup-assets.sh)" ไม่ใช่ bug ในโค้ด
 
 ---
 

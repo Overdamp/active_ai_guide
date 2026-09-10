@@ -10,12 +10,11 @@
 
 - [ ] `conda activate ai_training` และยืนยัน Python 3.12
 - [ ] รัน Smoke Test (จาก `about_project.md` §5.2) — เช็ก `torch.cuda.is_available()`, FiftyOne 1.21, OpenCV, Ultralytics
-- [ ] **ชุดข้อมูลอยู่ในตัว repo แล้ว:** `datasets/active_learning_split/{seed,pool}_dataset/{train,valid,test}/{images,labels}` + `data.yaml` (26 คลาส)
-- [ ] **ตั้งค่า symlink ครั้งเดียว** (ภาพใน active_learning_split เป็น symlink):
-      `ln -sfn /home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11 datasets/overall-ptt-object-detection.v11i.yolov11`
-      แล้วตรวจ: `find datasets/active_learning_split/seed_dataset/valid/images -type l -xtype f | wc -l` → 773
+- [ ] **ดึง asset เข้า repo (ครั้งเดียวหลัง clone):** `bash scripts/setup-assets.sh`
+      → เติม `datasets/active_learning_split/{seed,pool}_dataset` + `models/*.pt` (hardlink, ~0 bytes)
+      สคริปต์เช็คให้เองว่า `seed_dataset/valid` resolve ได้ 773 และไม่มี symlink หลุดออกนอก repo
 - [ ] labs อ่าน path จาก env — ตั้งได้ถ้าต้องการ override:
-      `PTT_DATASET_DIR` (default `.../active_learning_split/seed_dataset`), `PTT_MODEL_PATH` (default โมเดลใน `PTT_smart_ai_platform/models/`)
+      `PTT_DATASET_DIR` (default `.../active_learning_split/seed_dataset`), `PTT_MODEL_PATH` (default `.../models/...pt` ในตัว repo)
 - [ ] ตรวจว่ามี GPU ว่างพอ (nvidia-smi) ก่อนเริ่มงานเทรน
 - [ ] มี CVAT server พร้อมใช้ + credentials (`url`, user, pass) สำหรับ `dataset.annotate()`
 - [ ] ตั้ง git branch ใหม่ต่อ 1 เสา (ห้าม commit ตรง main)

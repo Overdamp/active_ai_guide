@@ -27,7 +27,7 @@ from ultralytics import YOLO
 # ที่อยู่ชุดข้อมูล/โมเดล (แก้ผ่าน env PTT_DATASET_DIR / PTT_MODEL_PATH ได้)
 MODEL_PATH = os.environ.get(
     "PTT_MODEL_PATH",
-    "/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt",
+    "/home/luke/ai_training/PTT_ai_mini/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt",
 )
 BASE_DATASET = os.environ.get(
     "PTT_DATASET_DIR",

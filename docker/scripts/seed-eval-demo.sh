@@ -28,8 +28,7 @@ for img in H.list_ptt_images("valid", limit=N):
 if len(pairs) < 4:
     raise SystemExit(
         f"ไม่พบ label ที่ {H.PTT_DATASET_DIR}/valid/labels\n"
-        "- ตรวจว่า datasets/active_learning_split ถูกตั้งค่าแล้ว (symlink ต้อง resolve ได้)\n"
-        "- และ PTT_PLATFORM_DIR ใน .env ชี้ไป repo ต้นทางของภาพ"
+        "- รัน  bash scripts/setup-assets.sh  (จาก repo root) เพื่อดึง datasets/ เข้ามาก่อน"
     )
 
 ds = fo.Dataset(NAME, persistent=True, overwrite=True)

@@ -337,7 +337,7 @@ from ultralytics import YOLO
 # path โมเดล/ชุดข้อมูลใน PTT_ai_mini อ่านจาก env (ดู CLAUDE.md)
 model = YOLO(os.environ.get(
     "PTT_MODEL_PATH",
-    "/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt",
+    "/home/luke/ai_training/PTT_ai_mini/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt",
 ))
 
 for sample in dataset:

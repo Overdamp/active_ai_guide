@@ -28,7 +28,7 @@ DATASET_DIR = os.environ.get(
 # 1. โหลดโมเดลจริง PTT YOLO12 Baseline
 MODEL_PATH = os.environ.get(
     "PTT_MODEL_PATH",
-    "/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt",
+    "/home/luke/ai_training/PTT_ai_mini/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt",
 )
 print(f"⏳ กำลังโหลดโมเดล: {os.path.basename(MODEL_PATH)}...")
 device = "cuda" if torch.cuda.is_available() else "cpu"

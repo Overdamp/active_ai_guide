@@ -87,9 +87,9 @@ flowchart TD
 | **`fiftyone_module/lab_fiftyone_curation.py`** | ทั้งระบบ | ตัวอย่างการผสาน Built-in Methods ของ FiftyOne ร่วมกับ Custom OpenCV Enriched Fields | `python fiftyone_module/lab_fiftyone_curation.py` |
 | **`docker/`** (Docker Compose) | ทั้งระบบ (FiftyOne) | mongo + FiftyOne 1.21 + App :5151 + เทส 12 ไฟล์ครอบคลุมเครื่องมือ FiftyOne ทีละตัว (dedup, similarity, uniqueness, hardness, mistakenness, evaluate_detections, visualization, export/CVAT) | `cd docker && cp .env.example .env && docker compose up -d --build` → `docker/scripts/run-tests.sh` |
 
-> **ชุดข้อมูล:** อยู่ในตัว repo แล้วที่ `datasets/active_learning_split/{seed,pool}_dataset` (โครง YOLO `train/valid/test` + `data.yaml` 26 คลาส)
-> ภาพเก็บเป็น **symlink** → setup ครั้งเดียว: `ln -sfn /home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11 datasets/overall-ptt-object-detection.v11i.yolov11`
-> ทุก lab อ่าน path จาก env `PTT_DATASET_DIR` (default `.../active_learning_split/seed_dataset`) และ `PTT_MODEL_PATH`
+> **ชุดข้อมูล + โมเดล อยู่ในตัว repo แล้ว** — `datasets/active_learning_split/{seed,pool}_dataset` (โครง YOLO + `data.yaml` 26 คลาส) และ `models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt`
+> ทั้ง `datasets/` + `models/` gitignore ไว้ (ใหญ่) → หลัง clone รัน **`scripts/setup-assets.sh`** ครั้งเดียว (hardlink จาก repo ต้นทาง, ~0 bytes)
+> ทุก lab อ่าน path จาก env `PTT_DATASET_DIR` / `PTT_MODEL_PATH` (มี default ชี้ในตัว repo) — **ไม่พึ่ง `PTT_smart_ai_platform` ตอนรันแล้ว**
 
 ---
 
@@ -130,12 +130,14 @@ flowchart TD
 ├── docs/
 │   ├── about_project.md             # ไฟล์นี้
 │   └── implementation_checklist.md  # checklist เตรียม implement 4 เสา
+├── scripts/setup-assets.sh          # ดึง datasets/ + models/ เข้า repo (ครั้งเดียวหลัง clone)
 ├── datasets/                        # (gitignored) — ชุดข้อมูลในตัว repo
 │   ├── active_learning_split/
 │   │   ├── seed_dataset/            # 1000 train + valid/test  (default ของ labs)
 │   │   ├── pool_dataset/            # 2887 train + valid/test
 │   │   └── split_manifest.json
-│   └── overall-ptt-object-detection.v11i.yolov11 -> PTT_smart_ai_platform/... (symlink)
+│   └── overall-ptt-object-detection.v11i.yolov11/   # ไดเรกทอรีจริง (hardlink) ที่ symlink ด้านบนชี้หา
+├── models/                          # (gitignored) — PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt
 ├── filter_module/                   # เสาที่ 1–4 (lab a–d + lab01) + README.md + ผลลัพธ์ตัวอย่าง .json
 ├── fiftyone_module/                 # lab + README + fiftyone_complete_guide_th.md
 ├── docker/                          # Docker Compose: mongo + FiftyOne + เทส 12 ไฟล์ + App :5151
@@ -156,13 +158,14 @@ flowchart TD
   ```bash
   conda activate ai_training
   ```
-* **ชุดข้อมูล / โมเดล** — labs อ่านจาก env (ตั้งได้ถ้าจะ override):
+* **ชุดข้อมูล / โมเดล** — ครั้งแรกหลัง clone:
+  ```bash
+  bash scripts/setup-assets.sh        # ดึง datasets/ + models/ เข้ามาในตัว repo (hardlink, ~0 bytes)
+  ```
+  labs อ่าน path จาก env (มี default ในตัว repo — ตั้งเองได้ถ้าจะ override):
   ```bash
   export PTT_DATASET_DIR=/home/luke/ai_training/PTT_ai_mini/datasets/active_learning_split/seed_dataset   # หรือ .../pool_dataset
-  export PTT_MODEL_PATH=/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt
-  # ครั้งแรก: สร้าง symlink ต้นทางภาพ (ภาพใน active_learning_split เป็น symlink สัมพัทธ์ที่ต้องการ sibling นี้)
-  ln -sfn /home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11 \
-          /home/luke/ai_training/PTT_ai_mini/datasets/overall-ptt-object-detection.v11i.yolov11
+  export PTT_MODEL_PATH=/home/luke/ai_training/PTT_ai_mini/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt
   ```
 * **ทางเลือก Docker** (ไม่ต้องมี conda) สำหรับส่วน FiftyOne: `cd docker && cp .env.example .env && docker compose up -d --build` — ดู `docker/README.md`
 

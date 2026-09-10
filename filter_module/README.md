@@ -31,22 +31,19 @@ python filter_module/lab_d_retrain_and_diagnostics.py
 python filter_module/lab01_review_state.py     # สร้าง mini_ptt.db (gitignored)
 ```
 
-### ชุดข้อมูล / โมเดล (อ่านจาก env — มีค่า default)
+### ชุดข้อมูล / โมเดล (อยู่ในตัว repo — อ่านจาก env, มีค่า default)
 
 | env | default | หมายเหตุ |
 | :-- | :-- | :-- |
 | `PTT_DATASET_DIR` | `<repo>/datasets/active_learning_split/seed_dataset` | โครง YOLO `train/valid/test` + `data.yaml`; เปลี่ยนเป็น `.../pool_dataset` ได้ |
-| `PTT_MODEL_PATH` | `/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt` | ใช้ใน lab_c/lab_d |
+| `PTT_MODEL_PATH` | `<repo>/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt` | ใช้ใน lab_c/lab_d |
 
-**ตั้งค่า symlink ครั้งเดียว** (ภาพใน `active_learning_split` เป็น symlink สัมพัทธ์):
+**ครั้งเดียวหลัง clone** (`datasets/` + `models/` gitignore ไว้):
 ```bash
-ln -sfn /home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11 \
-        /home/luke/ai_training/PTT_ai_mini/datasets/overall-ptt-object-detection.v11i.yolov11
-# ตรวจ: ควรได้ 773
-find /home/luke/ai_training/PTT_ai_mini/datasets/active_learning_split/seed_dataset/valid/images -type l -xtype f | wc -l
+bash scripts/setup-assets.sh     # hardlink asset เข้า repo + เช็คว่า symlink resolve ครบ
 ```
 
-ถ้า symlink dangling หรือไม่มีโมเดล → lab_c/lab_d จะ error เรื่องหาไฟล์ไม่เจอ (= ขาด asset ไม่ใช่ bug ในโค้ด)
+ถ้ายังไม่รัน → lab_c/lab_d จะ error หาไฟล์ไม่เจอ (= ขาด asset, รัน `scripts/setup-assets.sh` ก่อน)
 
 ---
 
