@@ -2,7 +2,7 @@
 
 > ใช้เตรียมตัวก่อนลงมือ implement เสาหลักทั้ง 4 ใน repo จริง `PTT_smart_ai_platform/`
 > อ้างอิงจาก `docs/about_project.md` และ mini-labs ใน `PTT_ai_mini/`
-> อัปเดตล่าสุด: 2026-09-10
+> อัปเดตล่าสุด: 2026-09-10 (rev 2 — dataset ในตัว repo + docker FiftyOne lab)
 
 ---
 
@@ -10,9 +10,12 @@
 
 - [ ] `conda activate ai_training` และยืนยัน Python 3.12
 - [ ] รัน Smoke Test (จาก `about_project.md` §5.2) — เช็ก `torch.cuda.is_available()`, FiftyOne 1.21, OpenCV, Ultralytics
-- [ ] ยืนยันไฟล์โมเดลมีอยู่จริง: `PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt`
-- [ ] ยืนยัน dataset มีครบ 3 split: `datasets/overall-ptt-object-detection.v11i.yolov11/{train,valid,test}/{images,labels}`
-- [ ] ยืนยัน `data.yaml` มี 26 คลาสตรงกับ `config_manager.py`
+- [ ] **ชุดข้อมูลอยู่ในตัว repo แล้ว:** `datasets/active_learning_split/{seed,pool}_dataset/{train,valid,test}/{images,labels}` + `data.yaml` (26 คลาส)
+- [ ] **ตั้งค่า symlink ครั้งเดียว** (ภาพใน active_learning_split เป็น symlink):
+      `ln -sfn /home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11 datasets/overall-ptt-object-detection.v11i.yolov11`
+      แล้วตรวจ: `find datasets/active_learning_split/seed_dataset/valid/images -type l -xtype f | wc -l` → 773
+- [ ] labs อ่าน path จาก env — ตั้งได้ถ้าต้องการ override:
+      `PTT_DATASET_DIR` (default `.../active_learning_split/seed_dataset`), `PTT_MODEL_PATH` (default โมเดลใน `PTT_smart_ai_platform/models/`)
 - [ ] ตรวจว่ามี GPU ว่างพอ (nvidia-smi) ก่อนเริ่มงานเทรน
 - [ ] มี CVAT server พร้อมใช้ + credentials (`url`, user, pass) สำหรับ `dataset.annotate()`
 - [ ] ตั้ง git branch ใหม่ต่อ 1 เสา (ห้าม commit ตรง main)
@@ -28,6 +31,8 @@
 - [ ] `python filter_module/lab01_review_state.py` — เข้าใจ state machine (`pending → approved/rejected`)
 - [ ] `python fiftyone_module/lab_fiftyone_curation.py` — เข้าใจการผสาน FiftyOne built-in + custom fields
 - [ ] อ่าน `fiftyone_module/fiftyone_complete_guide_th.md` — จำได้ว่าอะไร built-in / อะไรต้องเขียนเอง
+- [ ] **(ทางเลือก) docker FiftyOne lab** — `cd docker && cp .env.example .env && docker compose up -d --build`
+      แล้ว `docker/scripts/run-tests.sh` (12 ไฟล์เทส ครอบคลุมเครื่องมือ FiftyOne ทีละตัว) — ดู `docker/README.md`
 - [ ] จดค่า baseline metrics ปัจจุบัน (mAP50, mAP50-95, per-class recall) จาก `model.val()` ไว้เทียบผลหลัง retrain
 
 ---

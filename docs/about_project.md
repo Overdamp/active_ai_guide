@@ -81,9 +81,15 @@ flowchart TD
 | :--- | :---: | :--- | :--- |
 | **`filter_module/lab_a_blur_glare.py`** | เสาที่ 1 | คำนวณค่าความคมชัด Laplacian Variance และคำนวณแสงสะท้อน HSV Mask บนภาพจริง ปตท. | `python filter_module/lab_a_blur_glare.py` |
 | **`filter_module/lab_b_dedup_uniqueness.py`** | เสาที่ 1 | สกัดเวกเตอร์ 576 มิติ (MobileNetV3) หาภาพถ่ายรัวซ้ำมุมเดิม ($\ge 90\%$) และจัดลำดับความแปลก (Uniqueness) จาก 25 ภาพจริง | `python filter_module/lab_b_dedup_uniqueness.py` |
-| **`lab_c_hard_samples.py`** | เสาที่ 1 & 2 | รัน YOLO จริงเทียบกับ Ground Truth หาภาพที่มี False Negatives แล้วสร้างไฟล์ `cvat_tasks_manifest.json` พร้อมภาพวาดเปรียบเทียบ `lab_c_hard_sample_visualized.jpg` | `python lab_c_hard_samples.py` |
-| **`lab_d_retrain_and_diagnostics.py`** | เสาที่ 3 & 4 | จำลอง Leaky Split Guard สกัดภาพ Test Set ทิ้ง, คำนวณ Hyperparameters เทรนซ้ำ, และรัน Rules Engine สร้างการ์ด Action Cards ออกมาเป็น `diagnostic_action_report.json` | `python lab_d_retrain_and_diagnostics.py` |
+| **`filter_module/lab_c_hard_samples.py`** | เสาที่ 1 & 2 | รัน YOLO จริงเทียบกับ Ground Truth หาภาพที่มี False Negatives แล้วสร้างไฟล์ `cvat_tasks_manifest.json` พร้อมภาพวาดเปรียบเทียบ `lab_c_hard_sample_visualized.jpg` | `python filter_module/lab_c_hard_samples.py` |
+| **`filter_module/lab_d_retrain_and_diagnostics.py`** | เสาที่ 3 & 4 | จำลอง Leaky Split Guard สกัดภาพ Test Set ทิ้ง, คำนวณ Hyperparameters เทรนซ้ำ, และรัน Rules Engine สร้างการ์ด Action Cards ออกมาเป็น `diagnostic_action_report.json` | `python filter_module/lab_d_retrain_and_diagnostics.py` |
+| **`filter_module/lab01_review_state.py`** | เสาที่ 2 | จำลองตาราง `hard_sample_reviews` ด้วย SQLAlchemy/SQLite — state machine `pending → approved/rejected` → ดึงเฉพาะ approved ส่ง CVAT | `python filter_module/lab01_review_state.py` |
 | **`fiftyone_module/lab_fiftyone_curation.py`** | ทั้งระบบ | ตัวอย่างการผสาน Built-in Methods ของ FiftyOne ร่วมกับ Custom OpenCV Enriched Fields | `python fiftyone_module/lab_fiftyone_curation.py` |
+| **`docker/`** (Docker Compose) | ทั้งระบบ (FiftyOne) | mongo + FiftyOne 1.21 + App :5151 + เทส 12 ไฟล์ครอบคลุมเครื่องมือ FiftyOne ทีละตัว (dedup, similarity, uniqueness, hardness, mistakenness, evaluate_detections, visualization, export/CVAT) | `cd docker && cp .env.example .env && docker compose up -d --build` → `docker/scripts/run-tests.sh` |
+
+> **ชุดข้อมูล:** อยู่ในตัว repo แล้วที่ `datasets/active_learning_split/{seed,pool}_dataset` (โครง YOLO `train/valid/test` + `data.yaml` 26 คลาส)
+> ภาพเก็บเป็น **symlink** → setup ครั้งเดียว: `ln -sfn /home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11 datasets/overall-ptt-object-detection.v11i.yolov11`
+> ทุก lab อ่าน path จาก env `PTT_DATASET_DIR` (default `.../active_learning_split/seed_dataset`) และ `PTT_MODEL_PATH`
 
 ---
 
@@ -115,6 +121,31 @@ flowchart TD
 │       └── diagnostics_hub.py              # ตัวรวมสัญญาณความผิดปกติทุกโมดูล
 ```
 
+### 4.1 โครงสร้าง repo นี้ (`PTT_ai_mini`) ตอนนี้
+
+```text
+/home/luke/ai_training/PTT_ai_mini/
+├── CLAUDE.md / AGENTS.md            # บริบทโปรเจกต์ (อ่านก่อนเริ่ม)
+├── .claude/agents/                  # subagents: pillar-filter, pillar-diagnostics, lab-verifier
+├── docs/
+│   ├── about_project.md             # ไฟล์นี้
+│   └── implementation_checklist.md  # checklist เตรียม implement 4 เสา
+├── datasets/                        # (gitignored) — ชุดข้อมูลในตัว repo
+│   ├── active_learning_split/
+│   │   ├── seed_dataset/            # 1000 train + valid/test  (default ของ labs)
+│   │   ├── pool_dataset/            # 2887 train + valid/test
+│   │   └── split_manifest.json
+│   └── overall-ptt-object-detection.v11i.yolov11 -> PTT_smart_ai_platform/... (symlink)
+├── filter_module/                   # เสาที่ 1–4 (lab a–d + lab01) + README.md + ผลลัพธ์ตัวอย่าง .json
+├── fiftyone_module/                 # lab + README + fiftyone_complete_guide_th.md
+├── docker/                          # Docker Compose: mongo + FiftyOne + เทส 12 ไฟล์ + App :5151
+│   ├── docker-compose.yml / Dockerfile / requirements.txt
+│   ├── scripts/  (run-tests, run-lab, seed-demo, seed-eval-demo, launch-app)
+│   └── tests/    (test_00..test_11 — เครื่องมือ FiftyOne ทีละตัว)
+├── cvat_module/                     # (ว่าง) — ที่สำหรับงานเชื่อม CVAT เสาที่ 2
+└── diagnostic_module/               # (ว่าง) — ที่สำหรับพอร์ต logic เสาที่ 4
+```
+
 ---
 
 ## ⚙️ 5. สภาพแวดล้อมการทำงานและวิธีเริ่มต้นในวันแรก (Day 1 Quickstart)
@@ -125,6 +156,15 @@ flowchart TD
   ```bash
   conda activate ai_training
   ```
+* **ชุดข้อมูล / โมเดล** — labs อ่านจาก env (ตั้งได้ถ้าจะ override):
+  ```bash
+  export PTT_DATASET_DIR=/home/luke/ai_training/PTT_ai_mini/datasets/active_learning_split/seed_dataset   # หรือ .../pool_dataset
+  export PTT_MODEL_PATH=/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt
+  # ครั้งแรก: สร้าง symlink ต้นทางภาพ (ภาพใน active_learning_split เป็น symlink สัมพัทธ์ที่ต้องการ sibling นี้)
+  ln -sfn /home/luke/ai_training/PTT_smart_ai_platform/datasets/overall-ptt-object-detection.v11i.yolov11 \
+          /home/luke/ai_training/PTT_ai_mini/datasets/overall-ptt-object-detection.v11i.yolov11
+  ```
+* **ทางเลือก Docker** (ไม่ต้องมี conda) สำหรับส่วน FiftyOne: `cd docker && cp .env.example .env && docker compose up -d --build` — ดู `docker/README.md`
 
 ### 5.2 ทดสอบความพร้อมของระบบ (Smoke Test)
 รันคำสั่งนี้เพื่อเช็คว่าทั้ง GPU, YOLO และ FiftyOne ทำงานได้สมบูรณ์:

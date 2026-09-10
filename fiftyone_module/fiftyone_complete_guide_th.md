@@ -1,7 +1,9 @@
 # 📘 คู่มือฉบับสมบูรณ์: FiftyOne (Voxel51) สำหรับวิศวกร Computer Vision & MLOps
 
 > **ที่ตั้งเอกสาร**: `/home/luke/ai_training/PTT_ai_mini/fiftyone_module/fiftyone_complete_guide_th.md`  
-> **เป้าหมาย**: รวบรวมฟังก์ชันการทำงาน คำสั่ง รูปแบบการเขียนโค้ด (Syntax) และแนวทางปฏิบัติที่ดีที่สุด (Best Practices) ของ **FiftyOne** ทั้งหมด ตั้งแต่ระดับเริ่มต้นจนถึงระดับ Production ในระบบอุตสาหกรรม
+> **เป้าหมาย**: รวบรวมฟังก์ชันการทำงาน คำสั่ง รูปแบบการเขียนโค้ด (Syntax) และแนวทางปฏิบัติที่ดีที่สุด (Best Practices) ของ **FiftyOne** ทั้งหมด ตั้งแต่ระดับเริ่มต้นจนถึงระดับ Production ในระบบอุตสาหกรรม  
+> **ลองรันจริง**: `docker/` มี compose (mongo + FiftyOne App :5151) + เทส 12 ไฟล์ที่พิสูจน์ทุกฟังก์ชันในเอกสารนี้ทีละตัว — ดู `docker/README.md`  
+> **ชุดข้อมูล**: `datasets/active_learning_split/seed_dataset` (path อ่านจาก env `PTT_DATASET_DIR`)
 
 ---
 
@@ -329,9 +331,14 @@ hard_samples_view.annotate(
 
 ### 7.2 ผสานผลการทำนายจาก Ultralytics YOLO
 ```python
+import os
 from ultralytics import YOLO
 
-model = YOLO("models/PTT_YOLO12n_Baseline.pt")
+# path โมเดล/ชุดข้อมูลใน PTT_ai_mini อ่านจาก env (ดู CLAUDE.md)
+model = YOLO(os.environ.get(
+    "PTT_MODEL_PATH",
+    "/home/luke/ai_training/PTT_smart_ai_platform/models/PTT_YOLO12n_v11i_Baseline_v1.0.0_best.pt",
+))
 
 for sample in dataset:
     result = model(sample.filepath, conf=0.25, verbose=False)[0]

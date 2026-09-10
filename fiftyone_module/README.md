@@ -3,6 +3,16 @@
 > **โฟลเดอร์**: `/home/luke/ai_training/PTT_ai_mini/fiftyone_module/`  
 > เอกสารและชุดโค้ดนี้สรุปเปรียบเทียบระหว่าง **สิ่งที่ FiftyOne มีให้พร้อมใช้ทันที** กับ **สิ่งที่ระบบอุตสาหกรรมจริง (เช่น ปตท.) ต้องเขียน Custom เพิ่มเติม**
 
+## ⚡ รันจริงได้ที่ไหน
+
+| วิธี | คำสั่ง | เหมาะกับ |
+| :-- | :-- | :-- |
+| **conda** | `conda activate ai_training && python fiftyone_module/lab_fiftyone_curation.py` | ดูตัวอย่างเร็ว ๆ |
+| **docker lab** (แนะนำ) | `cd docker && cp .env.example .env && docker compose up -d --build` แล้ว `docker/scripts/run-tests.sh` | ครบทุกเครื่องมือ — mongo + FiftyOne App :5151 + เทส 12 ไฟล์ (ทีละฟังก์ชัน) — ดู `docker/README.md` |
+
+- ชุดข้อมูล: `datasets/active_learning_split/seed_dataset` (override ด้วย env `PTT_DATASET_DIR`)
+- ภาพเป็น symlink — ตั้งค่าครั้งเดียวตาม `docker/README.md` §"ตั้งค่าชุดข้อมูล"
+
 ---
 
 ## 📊 1. ตารางเปรียบเทียบฟังก์ชันใน FiftyOne
@@ -135,3 +145,23 @@ flowchart TD
     G --> H["Custom: Leaky Split Guard<br/>(สกัดภาพ Test Set ทิ้ง)"]
     H --> I["Continuous Retraining Pipeline<br/>(Ultralytics YOLO Fine-tuning)"]
 ```
+
+---
+
+## 🧪 5. เครื่องมือในเอกสารนี้ ↔ ไฟล์เทสใน `docker/tests/`
+
+แต่ละหัวข้อข้างบนมีเทสที่รันจริงพิสูจน์ (ดูวิธีรัน + ตารางเต็มใน `docker/README.md`)
+
+| หัวข้อ | ไฟล์เทส |
+| :-- | :-- |
+| compute_metadata / Dataset API | `test_01_dataset_and_metadata.py` |
+| Blur/Glare custom field + ViewField (§3.1) | `test_02_custom_fields_blur_glare.py` |
+| Exact duplicates (§2.1) | `test_03_exact_duplicates.py` |
+| Similarity / near-duplicates (§2.1) | `test_04_similarity_near_duplicates.py` |
+| Uniqueness / diversity | `test_05_uniqueness.py` |
+| Hardness (§2.3) | `test_06_hardness.py` |
+| Mistakenness (§2.2) | `test_07_mistakenness.py` |
+| evaluate_detections (mAP / TP·FP·FN) | `test_08_evaluate_detections.py` |
+| compute_visualization (UMAP/PCA) | `test_09_visualization.py` |
+| View + aggregations | `test_10_views_and_aggregations.py` |
+| export YOLO/COCO + CVAT backend (§2.4) | `test_11_export_import_and_cvat.py` |
