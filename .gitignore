@@ -1,0 +1,32 @@
+# config ที่ไม่ใช่ของโปรเจกต์นี้
+# .claude/worktrees = git worktree ของ repo อื่น (PTT_smart_ai_platform) ~120MB
+# .agents/skills = ชุด skill ส่วนตัวของผู้ใช้ ไม่เกี่ยวโปรเจกต์
+.claude/worktrees/
+.agents/skills/
+.claude/skills
+.claude/settings.local.json
+
+# ชุดข้อมูล / โมเดล (ใหญ่ ไม่เก็บใน git — ดู path จริงใน CLAUDE.md)
+datasets/
+models/
+*.pt
+*.onnx
+*.cache
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ผลลัพธ์ที่ generate ใหม่ได้ / state ชั่วคราว
+*.db
+mini_ptt.db
+.fiftyone/
+runs/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

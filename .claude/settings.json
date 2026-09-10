@@ -1,0 +1,60 @@
+{
+    "statusLine": {
+        "type": "command",
+        "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/statusline.sh"
+    },
+    "permissions": {
+        "allow": [
+            "Bash(python filter_module/*.py)",
+            "Bash(python fiftyone_module/*.py)",
+            "Bash(python -c *)",
+            "Bash(ls *)",
+            "Bash(cat *)",
+            "Bash(find *)",
+            "Bash(grep *)",
+            "Bash(rg *)",
+            "Bash(git status)",
+            "Bash(git diff *)",
+            "Bash(git log *)",
+            "Bash(git add *)",
+            "Bash(git commit *)",
+            "Read(//home/luke/ai_training/PTT_smart_ai_platform/**)"
+        ],
+        "deny": [
+            "Edit(//home/luke/ai_training/PTT_smart_ai_platform/**)",
+            "Write(//home/luke/ai_training/PTT_smart_ai_platform/**)"
+        ]
+    },
+    "hooks": {
+        "Stop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/stop.sh"
+                    }
+                ]
+            }
+        ],
+        "PermissionRequest": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/approve.sh"
+                    }
+                ]
+            }
+        ],
+        "UserPromptSubmit": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/start.sh"
+                    }
+                ]
+            }
+        ]
+    }
+}

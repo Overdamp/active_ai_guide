@@ -1,0 +1,42 @@
+{
+  "status": "NEEDS_ATTENTION",
+  "retrain_ready": true,
+  "safe_buffer_count": 3,
+  "leaks_blocked": 1,
+  "action_directives": [
+    {
+      "directive_id": "DIR-001",
+      "category": "INFERENCE_POSTPROC",
+      "severity": "CRITICAL",
+      "title": "เปิดใช้งาน SAHI (Slicing Aided Hyper Inference) สำหรับวาล์วขนาดเล็ก",
+      "diagnosis": "พบอุปกรณ์ขนาดเล็กและหนาแน่น (small-valve, manual-valve-stem, flange, valve-body) หลุดรอดไปถึง 53 จุด เพราะภาพถูกย่อเหลือ 640x640 จนวาล์วกลายเป็นพิกเซลขนาดจิ๋ว",
+      "action_steps": [
+        "เปิดโหมด SAHI Slicing ในขั้นตอน Inference เพื่อตัดภาพย่อยขนาด 512x512 แบบ Overlap 20%",
+        "นำผลลัพธ์มา Merge ด้วย NMS / Soft-NMS เพื่อเก็บรายละเอียดวาล์วจิ๋วระยะไกล",
+        "คาดการณ์: ช่วยดึง Recall ของ small-valve และ valve-stem กลับมาได้ 15-25%"
+      ],
+      "suggested_parameters": {
+        "slice_height": 512,
+        "slice_width": 512,
+        "overlap_height_ratio": 0.2,
+        "overlap_width_ratio": 0.2
+      }
+    },
+    {
+      "directive_id": "DIR-002",
+      "category": "DATA_AUGMENTATION",
+      "severity": "WARNING",
+      "title": "เพิ่มการทำ Copy-Paste Augmentation สำหรับคลาส flange",
+      "diagnosis": "คลาส flange มีค่า Confidence ก้ำกึ่งสูงที่สุด (64 กล่อง) แสดงว่าโมเดลยังสับสนกับ Texture พื้นหลัง",
+      "action_steps": [
+        "ตัดชิ้นส่วนของ flange จากภาพที่ผ่าน CVAT แล้วนำไปแปะสุ่ม (Copy-Paste) บนพื้นหลังท่อเหล็กอื่นๆ",
+        "ตั้งค่า copy_paste=0.3 ใน hyperparameter การเทรนรอบถัดไป",
+        "เน้นส่งภาพกลุ่มนี้ให้คนรีวิวใน CVAT เพิ่มเติม"
+      ],
+      "suggested_parameters": {
+        "copy_paste_prob": 0.3,
+        "target_class": "flange"
+      }
+    }
+  ]
+}
